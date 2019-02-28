@@ -34,7 +34,8 @@ export default (arr) => {
       for (let j = 0, jl = next.length; j < jl; j++) {
         nn = next[j]
         width = Math.min(tt[1], nn[1]) - Math.max(tt[0], nn[0])
-        if (width > maxWidth) {
+        // 修改避免相邻两个数的差值为1（实际宽度为2）没有为start,end赋值导致的bug,应该加上=
+        if (width >= maxWidth) {
           maxWidth = width
           start = Math.max(tt[0], nn[0])
           end = Math.min(tt[1], nn[1])
@@ -52,8 +53,16 @@ export default (arr) => {
         }
       }
     } else {
-      arr.push([[start, end]])
-      maxRect(arr, result, n++)
+      // 找到交叉点继续下一行
+      if (arr.length > 0) {
+        arr.push([
+          [start, end]
+        ])
+        maxRect(arr, result, n++)
+      } else {
+        // 从某一行一直计算到最后一行，这个时候start和end一直有值，所以不会进入到if层，这个时候n就是累计的行数（高），end-start+1就是宽
+        result.push(n * (end - start + 1))
+      }
     }
   }
   while (arr.length > 1) {
